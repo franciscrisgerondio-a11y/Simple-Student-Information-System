@@ -126,14 +126,14 @@ public class StudentDialog extends JDialog {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(245, 247, 250));
 
-        JButton btnSave = new JButton("Save");
-        JButton btnCancel = new JButton("Cancel");
+        JButton save = new JButton("Save");
+        JButton cancel = new JButton("Cancel");
 
-        styleButton(btnSave, new Color(40, 167, 69));
-        styleButton(btnCancel, new Color(220, 53, 69));
+        styleButton(save, new Color(40, 167, 69));
+        styleButton(cancel, new Color(220, 53, 69));
 
-        buttonPanel.add(btnSave);
-        buttonPanel.add(btnCancel);
+        buttonPanel.add(save);
+        buttonPanel.add(cancel);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -153,8 +153,8 @@ public class StudentDialog extends JDialog {
             cmbProgram.setSelectedItem(program);
         }
 
-        btnSave.addActionListener(e -> saveStudent());
-        btnCancel.addActionListener(e -> dispose());
+        save.addActionListener(e -> saveStudent());
+        cancel.addActionListener(e -> dispose());
     }
 
     /* ================= LOAD PROGRAMS ================= */

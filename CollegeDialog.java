@@ -52,14 +52,14 @@ public class CollegeDialog extends JDialog {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(245, 247, 250));
 
-        JButton btnSave = new JButton("Save");
-        JButton btnCancel = new JButton("Cancel");
+        JButton save = new JButton("Save");
+        JButton cancel = new JButton("Cancel");
 
-        styleButton(btnSave, new Color(40, 167, 69));
-        styleButton(btnCancel, new Color(220, 53, 69));
+        styleButton(save, new Color(40, 167, 69));
+        styleButton(cancel, new Color(220, 53, 69));
 
-        buttonPanel.add(btnSave);
-        buttonPanel.add(btnCancel);
+        buttonPanel.add(save);
+        buttonPanel.add(cancel);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -68,7 +68,7 @@ public class CollegeDialog extends JDialog {
             txtCollegeCode.setText(code);
         }
 
-        btnSave.addActionListener(e -> {
+        save.addActionListener(e -> {
             if (txtCollegeName.getText().trim().isEmpty() ||
                 txtCollegeCode.getText().trim().isEmpty()) {
 
@@ -83,7 +83,7 @@ public class CollegeDialog extends JDialog {
             dispose();
         });
 
-        btnCancel.addActionListener(e -> dispose());
+        cancel.addActionListener(e -> dispose());
     }
 
     private void styleButton(JButton button, Color color) {

@@ -60,6 +60,9 @@ public class ProgramDialog extends JDialog {
         JButton save = new JButton("Save");
         JButton cancel = new JButton("Cancel");
 
+        styleButton(save, new Color(40, 167, 69));
+        styleButton(cancel, new Color(220, 53, 69));
+
         buttons.add(save);
         buttons.add(cancel);
 
@@ -91,6 +94,14 @@ public class ProgramDialog extends JDialog {
         });
 
         cancel.addActionListener(e -> dispose());
+    }
+
+    private void styleButton(JButton button, Color color) {
+        button.setFocusPainted(false);
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setPreferredSize(new Dimension(100, 35));
     }
 
     public boolean isSaved() {

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.*;
 
-public class DatabaseSystem extends JFrame {
+public class Main extends JFrame {
 
     private JTable table;
     private DefaultTableModel studentModel;
@@ -26,9 +26,9 @@ public class DatabaseSystem extends JFrame {
     private java.util.List<String[]> masterColleges = new ArrayList<>();
     private java.util.List<String[]> masterPrograms = new ArrayList<>();
 
-    public DatabaseSystem() {
+    public Main() {
         setTitle("Student Directory");
-        setSize(1100, 600);
+        setSize(1100, 603);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -47,7 +47,6 @@ public class DatabaseSystem extends JFrame {
 
         table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
         table.getColumn("Actions").setCellEditor(new ButtonEditor());
-
         table.getColumn("Actions").setPreferredWidth(160);
         table.getColumn("Actions").setMaxWidth(180);
         table.getColumn("Actions").setMinWidth(140);
@@ -58,16 +57,23 @@ public class DatabaseSystem extends JFrame {
 
         JPanel header = new JPanel(new BorderLayout());
         header.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        header.setBackground(new Color(245, 247, 250));
+        header.setBackground(new Color(100, 109, 237));
 
         JLabel title = new JLabel("Student Directory");
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
 
         JPanel switchPanel = new JPanel();
+        switchPanel.setBackground(new Color(100, 109, 237));
+        
         JButton studentBtn = new JButton("Students");
         JButton collegeBtn = new JButton("Colleges");
         JButton programBtn = new JButton("Programs");
         JButton addBtn = new JButton("Add");
+
+        styleButton(studentBtn, new Color(100, 149, 237));
+        styleButton(collegeBtn, new Color(100, 149, 237));
+        styleButton(programBtn, new Color(100, 149, 237));
+        styleButton(addBtn, new Color(40, 167, 69));
 
         switchPanel.add(studentBtn);
         switchPanel.add(collegeBtn);
@@ -119,6 +125,7 @@ public class DatabaseSystem extends JFrame {
     private JPanel createContent() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        panel.setBackground(new Color(150, 209, 237));
 
         searchField = new JTextField(15);
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -131,6 +138,7 @@ public class DatabaseSystem extends JFrame {
         });
 
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        searchPanel.setBackground(new Color(150, 209, 237));
         searchPanel.add(new JLabel("Search:"));
         searchPanel.add(searchField);
 
@@ -171,8 +179,14 @@ public class DatabaseSystem extends JFrame {
         };
 
         table = new JTable(studentModel);
+
+        table.setBackground(new Color(100, 109, 237));
+        table.setShowVerticalLines(true);
+        table.setSelectionBackground(new Color(219, 234, 254)); // light blue
+        table.setSelectionForeground(Color.BLACK);
         table.setRowHeight(36);
         table.setDefaultRenderer(Object.class, new HighlightRenderer());
+        
 
         // Sort
         table.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
@@ -207,8 +221,13 @@ public class DatabaseSystem extends JFrame {
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
+        panel.setBackground(new Color(150, 209, 237));
+
         btnPrev = new JButton("<< Prev");
         btnNext = new JButton("Next >>");
+
+        styleButton(btnPrev, new Color(220, 53, 69));
+        styleButton(btnNext, new Color(40, 167, 69));
         pageLabel = new JLabel();
 
         btnPrev.addActionListener(e -> {
@@ -513,8 +532,17 @@ public class DatabaseSystem extends JFrame {
     class ButtonRenderer extends JPanel implements TableCellRenderer {
         public ButtonRenderer() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
-            add(new JButton("Edit"));
-            add(new JButton("Delete"));
+            JButton edit = new JButton("Edit");
+            JButton delete = new JButton("Delete");
+
+            edit.setBackground(new Color(40, 167, 69));
+            edit.setForeground(Color.WHITE);
+
+            delete.setBackground(new Color(220, 53, 69));
+            delete.setForeground(Color.WHITE);
+
+            add(edit);
+            add(delete);
         }
 
         @Override
@@ -528,6 +556,7 @@ public class DatabaseSystem extends JFrame {
         JPanel panel = new JPanel();
         JButton edit = new JButton("Edit");
         JButton delete = new JButton("Delete");
+        
 
         public ButtonEditor() {
 
@@ -566,7 +595,7 @@ public class DatabaseSystem extends JFrame {
                 int row = table.convertRowIndexToModel(viewRow);
 
                 int confirm = JOptionPane.showConfirmDialog(
-                        DatabaseSystem.this,
+                        Main.this,
                         "Are you sure you want to delete this record?",
                         "Confirm Delete",
                         JOptionPane.YES_NO_OPTION,
@@ -593,7 +622,7 @@ public class DatabaseSystem extends JFrame {
                         String collegeCode = table.getValueAt(viewRow, 1).toString();
 
                         int cascadeConfirm = JOptionPane.showConfirmDialog(
-                                DatabaseSystem.this,
+                                Main.this,
                                 """
                                 Deleting this college will also delete its programs
                                 and set affected students to NULL.
@@ -634,7 +663,7 @@ public class DatabaseSystem extends JFrame {
                         String programCode = table.getValueAt(viewRow, 0).toString();
 
                         int cascadeConfirm = JOptionPane.showConfirmDialog(
-                                DatabaseSystem.this,
+                                Main.this,
                                 "Deleting this program will set affected students to NULL.\n\nContinue?",
                                 "Cascade Delete Warning",
                                 JOptionPane.YES_NO_OPTION,
@@ -681,6 +710,14 @@ public class DatabaseSystem extends JFrame {
         }
     }
 
+    private void styleButton(JButton button, Color color) {
+        button.setFocusPainted(false);
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setPreferredSize(new Dimension(100, 35));
+    }
+
     class HighlightRenderer extends DefaultTableCellRenderer {
 
         @Override
@@ -719,6 +756,6 @@ public class DatabaseSystem extends JFrame {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ignored) {}
 
-        SwingUtilities.invokeLater(() -> new DatabaseSystem().setVisible(true));
+        SwingUtilities.invokeLater(() -> new Main().setVisible(true));
     }
 }
