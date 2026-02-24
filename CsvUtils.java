@@ -8,6 +8,7 @@ public class CsvUtils {
     private static final String COLLEGE_FILE = DATA_FOLDER + "colleges.csv";
     private static final String PROGRAM_FILE = DATA_FOLDER + "program.csv";
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private static List<String[]> readFile(String path, boolean skipHeader) {
         List<String[]> rows = new ArrayList<>();
         File file = new File(path);
@@ -40,6 +41,7 @@ public class CsvUtils {
         return rows;
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private static void writeFile(String path, List<String[]> rows, String header) {
 
         createFile(path, header);
@@ -86,6 +88,7 @@ public class CsvUtils {
         writeFile(PROGRAM_FILE, rows, null);
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private static void createFile(String path, String header) {
 
         try {

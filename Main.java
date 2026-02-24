@@ -27,7 +27,7 @@ public class Main extends JFrame {
     private java.util.List<String[]> masterPrograms = new ArrayList<>();    
 
     public Main() {
-        setTitle("Student Directory");
+        setTitle("Student Directory Management System");
         setSize(1100, 603);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
