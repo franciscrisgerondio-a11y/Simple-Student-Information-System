@@ -377,14 +377,18 @@ public class Main extends JFrame {
         }
     }
 
-    private void editStudent(int row) {
+    private void editStudent(String studentId) {
 
-        if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Please select a student to edit.");
-            return;
+        String[] data = null;
+
+        for (String[] s : masterStudents) {
+            if (s[0].equals(studentId)) {
+                data = s;
+                break;
+            }
         }
 
-        String[] data = masterStudents.get(row);
+        if (data == null) return;
 
         StudentDialog dialog = new StudentDialog(
                 this,
@@ -402,20 +406,18 @@ public class Main extends JFrame {
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
-            masterStudents.set(row, new String[]{
-                    dialog.getStudentId(),
-                    dialog.getStudentName(),
-                    dialog.getLastName(),
-                    dialog.getProgram(),
-                    dialog.getYear(),
-                    dialog.getGender()
-            });
+
+            // Update the actual object found
+            data[1] = dialog.getStudentName();
+            data[2] = dialog.getLastName();
+            data[3] = dialog.getProgram();
+            data[4] = dialog.getYear();
+            data[5] = dialog.getGender();
 
             CsvUtils.writeAll(masterStudents);
             refresh();
         }
     }
-
     private void addCollege() {
 
         CollegeDialog dialog = new CollegeDialog(this, masterColleges, null, null);
@@ -433,21 +435,28 @@ public class Main extends JFrame {
         }
     }
 
-    private void editCollege(int row) {
+    private void editCollege(String collegeCode) {
 
-        if (row < 0) return;
+        String[] data = null;
 
-        String[] data = masterColleges.get(row);
+        for (String[] c : masterColleges) {
+            if (c[1].equals(collegeCode)) {
+                data = c;
+                break;
+            }
+        }
 
-        CollegeDialog dialog = new CollegeDialog(this, masterColleges, data[0], data[1]);
+        if (data == null) return;
+
+        CollegeDialog dialog =
+                new CollegeDialog(this, masterColleges, data[0], data[1]);
+
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
 
-            masterColleges.set(row, new String[]{
-                    dialog.getCollegeName(),
-                    dialog.getCollegeCode()
-            });
+            data[0] = dialog.getCollegeName();
+            data[1] = dialog.getCollegeCode();
 
             CsvUtils.writeAllColleges(masterColleges);
             refresh();
@@ -472,22 +481,29 @@ public class Main extends JFrame {
         }
     }
 
-    private void editProgram(int row) {
+    private void editProgram(String programCode) {
 
-        if (row < 0) return;
+        String[] data = null;
 
-        String[] data = masterPrograms.get(row);
+        for (String[] p : masterPrograms) {
+            if (p[0].equals(programCode)) {
+                data = p;
+                break;
+            }
+        }
 
-        ProgramDialog dialog = new ProgramDialog(this, masterPrograms, masterColleges, data[0], data[1], data[2]);
+        if (data == null) return;
+
+        ProgramDialog dialog =
+                new ProgramDialog(this, masterPrograms, masterColleges,
+                        data[0], data[1], data[2]);
+
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
 
-            masterPrograms.set(row, new String[]{
-                    dialog.getProgramCode(),
-                    dialog.getProgramName(),
-                    dialog.getCollege()
-            });
+            data[1] = dialog.getProgramName();
+            data[2] = dialog.getCollege();
 
             CsvUtils.writeAllPrograms(masterPrograms);
             refresh();
@@ -568,18 +584,30 @@ public class Main extends JFrame {
 
             edit.addActionListener(e -> {
 
+                 if (table.isEditing()) {
+                    table.getCellEditor().stopCellEditing();
+                }
+
                 int viewRow = table.getSelectedRow();
                 if (viewRow < 0) return;
 
-                int row = table.convertRowIndexToModel(viewRow);
-
                 switch (currentView) {
 
-                    case "STUDENT" -> editStudent(row);
+                    case "STUDENT" -> {
+                        String id = table.getValueAt(viewRow, 0).toString();
+                        editStudent(id);
+                    }
 
-                    case "COLLEGE" -> editCollege(row);
 
-                    case "PROGRAM" -> editProgram(row);
+                    case "COLLEGE" -> {
+                        String code = table.getValueAt(viewRow, 1).toString();
+                        editCollege(code);
+                    }
+
+                    case "PROGRAM" -> {
+                        String code = table.getValueAt(viewRow, 0).toString();
+                        editProgram(code);
+                    }
                 }
 
                 fireEditingStopped();

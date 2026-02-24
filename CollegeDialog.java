@@ -73,6 +73,7 @@ public class CollegeDialog extends JDialog {
         if (name != null) {
             txtCollegeName.setText(name);
             txtCollegeCode.setText(code);
+            txtCollegeCode.setEditable(false);
         }
 
         save.addActionListener(e -> {
