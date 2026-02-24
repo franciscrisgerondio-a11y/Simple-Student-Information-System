@@ -9,9 +9,20 @@ public class ProgramDialog extends JDialog {
     private JComboBox<String> cmbCollege;
     private boolean saved = false;
 
-    public ProgramDialog(JFrame parent, String programCode, String programName, String college) {
+    private java.util.List<String[]> masterPrograms;
+    private java.util.List<String[]> masterColleges;
+
+    public ProgramDialog(JFrame parent,
+                     java.util.List<String[]> masterPrograms,
+                     java.util.List<String[]> masterColleges,
+                     String programCode,
+                     String programName,
+                     String college) {
 
         super(parent, true);
+
+        this.masterPrograms = masterPrograms;
+        this.masterColleges = masterColleges;
 
         setTitle(programName == null ? "Add Program" : "Edit Program");
         setSize(450, 350);
@@ -46,8 +57,8 @@ public class ProgramDialog extends JDialog {
         form.add(new JLabel("College:"));
         cmbCollege = new JComboBox<>();
 
-        for (String[] r : CsvUtils.readAllColleges()) {
-            cmbCollege.addItem(r[1]);
+        for (String[] r : this.masterColleges) {
+            cmbCollege.addItem(r[1]); // college code
         }
 
         form.add(cmbCollege);
@@ -77,16 +88,33 @@ public class ProgramDialog extends JDialog {
         }
 
         save.addActionListener(e -> {
-            
 
-            if (txtProgramCode.getText().trim().isEmpty()) {
+            String code = txtProgramCode.getText().trim();
+            String name = txtProgramName.getText().trim();
+
+            if (code.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Program code required.");
                 return;
             }
 
-            if (txtProgramName.getText().trim().isEmpty()) {
+            if (name.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Program name required.");
                 return;
+            }
+
+            if (txtProgramCode.isEditable()) {
+
+                for (String[] row : this.masterPrograms) {
+
+                    if (row[0].equalsIgnoreCase(code)) {
+
+                        JOptionPane.showMessageDialog(this,
+                                "Program code already exists.",
+                                "Duplicate Program Code",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
             }
 
             saved = true;

@@ -65,7 +65,7 @@ public class CsvUtils {
 
     public static void writeAll(List<String[]> rows) {
 
-        String header = "ID,First Name,Last Name,Program,College,Year,Gender";
+        String header = "ID,First Name,Last Name,Program,Year,Gender";
 
         writeFile(STUDENT_FILE, rows, header);
     }

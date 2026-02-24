@@ -8,9 +8,16 @@ public class CollegeDialog extends JDialog {
     private JTextField txtCollegeCode;
     private boolean saved = false;
 
-    public CollegeDialog(JFrame parent, String name, String code) {
+    private java.util.List<String[]> masterColleges;
+
+    public CollegeDialog(JFrame parent,
+                     java.util.List<String[]> masterColleges,
+                     String name,
+                     String code) {
 
         super(parent, true);
+
+        this.masterColleges = masterColleges;
 
         setTitle(name == null ? "Add College" : "Edit College");
         setSize(450, 320);
@@ -69,14 +76,32 @@ public class CollegeDialog extends JDialog {
         }
 
         save.addActionListener(e -> {
-            if (txtCollegeName.getText().trim().isEmpty() ||
-                txtCollegeCode.getText().trim().isEmpty()) {
+
+            String nameValue = txtCollegeName.getText().trim();
+            String codeValue = txtCollegeCode.getText().trim();
+
+            if (nameValue.isEmpty() || codeValue.isEmpty()) {
 
                 JOptionPane.showMessageDialog(this,
                         "All fields must be filled.",
                         "Missing Information",
                         JOptionPane.WARNING_MESSAGE);
                 return;
+            }
+
+            if (txtCollegeCode.isEditable()) {
+
+                for (String[] row : this.masterColleges) {
+
+                    if (row[1].equalsIgnoreCase(codeValue)) {
+
+                        JOptionPane.showMessageDialog(this,
+                                "College code already exists.",
+                                "Duplicate College Code",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
             }
 
             saved = true;

@@ -24,7 +24,7 @@ public class Main extends JFrame {
 
     private java.util.List<String[]> masterStudents = new ArrayList<>();
     private java.util.List<String[]> masterColleges = new ArrayList<>();
-    private java.util.List<String[]> masterPrograms = new ArrayList<>();
+    private java.util.List<String[]> masterPrograms = new ArrayList<>();    
 
     public Main() {
         setTitle("Student Directory");
@@ -32,7 +32,7 @@ public class Main extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        setResizable(false);
+        setResizable(true);
 
         add(createHeader(), BorderLayout.NORTH);
         add(createContent(), BorderLayout.CENTER);
@@ -152,11 +152,11 @@ public class Main extends JFrame {
     private JScrollPane createTable() {
 
         studentModel = new DefaultTableModel(
-            new String[]{"ID", "First Name", "Last Name","College", "Program", "Year", "Gender", "Actions"}, 0
+            new String[]{"ID", "First Name", "Last Name", "Program", "Year", "Gender", "Actions"}, 0
         ) {
             @Override
             public boolean isCellEditable(int r, int c) {
-                return c == 7;
+                return c == 6;
             }
         };
 
@@ -179,10 +179,11 @@ public class Main extends JFrame {
         };
 
         table = new JTable(studentModel);
+        table.getTableHeader().setDefaultRenderer(new SortHeaderRenderer(table));
 
-        table.setBackground(new Color(100, 109, 237));
+        table.setBackground(new Color(219, 234, 254));
         table.setShowVerticalLines(true);
-        table.setSelectionBackground(new Color(219, 234, 254)); // light blue
+        table.setSelectionBackground(new Color(247, 215, 144)); 
         table.setSelectionForeground(Color.BLACK);
         table.setRowHeight(36);
         table.setDefaultRenderer(Object.class, new HighlightRenderer());
@@ -207,6 +208,7 @@ public class Main extends JFrame {
 
                 currentPage = 1; // reset to first page
                 refresh();
+                table.getTableHeader().repaint();
             }
         });
 
@@ -344,7 +346,7 @@ public class Main extends JFrame {
             String[] row = filtered.get(i);
 
             switch (currentView) {
-                case "STUDENT" -> activeModel.addRow(new Object[]{row[0],row[1],row[2],row[3],row[4],row[5],row[6],"Actions"});
+                case "STUDENT" -> activeModel.addRow(new Object[]{row[0],row[1],row[2],row[3],row[4],row[5],"Actions"});
                 case "COLLEGE" -> activeModel.addRow(new Object[]{row[0],row[1],"Actions"});
                 default -> activeModel.addRow(new Object[]{row[0],row[1],row[2],"Actions"});
             }
@@ -355,23 +357,23 @@ public class Main extends JFrame {
     /* ================= ACTIONS ================= */
 
     private void addStudent() {
-        StudentDialog dialog = new StudentDialog(this, null, null, null, null, null, null, null);
+
+        StudentDialog dialog = new StudentDialog(this, masterStudents, masterPrograms, masterColleges, null, null, null, null, null, null);
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
 
-            studentModel.addRow(new Object[]{
+            masterStudents.add(new String[]{
                     dialog.getStudentId(),
                     dialog.getStudentName(),
                     dialog.getLastName(),
-                    dialog.getCollege(),
                     dialog.getProgram(),
                     dialog.getYear(),
-                    dialog.getGender(),
-                    "Actions"
+                    dialog.getGender()
             });
 
-            saveStudentsToCSV();
+            CsvUtils.writeAll(masterStudents);
+            refresh();
         }
     }
 
@@ -382,76 +384,52 @@ public class Main extends JFrame {
             return;
         }
 
-        String id = studentModel.getValueAt(row, 0).toString();
-        String first = studentModel.getValueAt(row, 1).toString();
-        String last = studentModel.getValueAt(row, 2).toString();
-        String college = studentModel.getValueAt(row, 3).toString();
-        String program = studentModel.getValueAt(row, 4).toString();
-        String year = studentModel.getValueAt(row, 5).toString();
-        String gender = studentModel.getValueAt(row, 6).toString();
-        
+        String[] data = masterStudents.get(row);
 
-        StudentDialog dialog = new StudentDialog(this, id, first, last, college, program, year, gender);
+        StudentDialog dialog = new StudentDialog(
+                this,
+                masterStudents,
+                masterPrograms,
+                masterColleges,
+                data[0],
+                data[1],
+                data[2],
+                data[3],
+                data[4],
+                data[5]
+        );
+
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
-            studentModel.setValueAt(dialog.getStudentName(), row, 1);
-            studentModel.setValueAt(dialog.getLastName(), row, 2);
-            studentModel.setValueAt(dialog.getCollege(), row, 3);
-            studentModel.setValueAt(dialog.getProgram(), row, 4);
-            studentModel.setValueAt(dialog.getYear(), row, 5);
-            studentModel.setValueAt(dialog.getGender(), row, 6);
-
-            saveStudentsToCSV();
-        }
-    }
-
-    private void saveStudentsToCSV() {
-        ArrayList<String[]> data = new ArrayList<>();
-
-        for (int i = 0; i < studentModel.getRowCount(); i++) {
-            data.add(new String[]{
-                    studentModel.getValueAt(i, 0).toString(),
-                    studentModel.getValueAt(i, 1).toString(),
-                    studentModel.getValueAt(i, 2).toString(),
-                    studentModel.getValueAt(i, 3).toString(),
-                    studentModel.getValueAt(i, 4).toString(),
-                    studentModel.getValueAt(i, 5).toString(),
-                    studentModel.getValueAt(i, 6).toString()
+            masterStudents.set(row, new String[]{
+                    dialog.getStudentId(),
+                    dialog.getStudentName(),
+                    dialog.getLastName(),
+                    dialog.getProgram(),
+                    dialog.getYear(),
+                    dialog.getGender()
             });
+
+            CsvUtils.writeAll(masterStudents);
+            refresh();
         }
-
-        CsvUtils.writeAll(data);
-    }
-
-    private void saveCollegesToCSV() {
-
-        ArrayList<String[]> data = new ArrayList<>();
-
-        for (int i = 0; i < collegeModel.getRowCount(); i++) {
-            data.add(new String[]{
-                    collegeModel.getValueAt(i, 0).toString(),
-                    collegeModel.getValueAt(i, 1).toString()
-            });
-        }
-
-        CsvUtils.writeAllColleges(data);
     }
 
     private void addCollege() {
 
-        CollegeDialog dialog = new CollegeDialog(this, null, null);
+        CollegeDialog dialog = new CollegeDialog(this, masterColleges, null, null);
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
 
-            collegeModel.addRow(new Object[]{
+            masterColleges.add(new String[]{
                     dialog.getCollegeName(),
-                    dialog.getCollegeCode(),
-                    "Actions"
+                    dialog.getCollegeCode()
             });
 
-            saveCollegesToCSV();
+            CsvUtils.writeAllColleges(masterColleges);
+            refresh();
         }
     }
 
@@ -459,50 +437,38 @@ public class Main extends JFrame {
 
         if (row < 0) return;
 
-        String name = collegeModel.getValueAt(row, 0).toString();
-        String code = collegeModel.getValueAt(row, 1).toString();
+        String[] data = masterColleges.get(row);
 
-        CollegeDialog dialog = new CollegeDialog(this, name, code);
+        CollegeDialog dialog = new CollegeDialog(this, masterColleges, data[0], data[1]);
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
-            collegeModel.setValueAt(dialog.getCollegeName(), row, 0);
-            collegeModel.setValueAt(dialog.getCollegeCode(), row, 1);
 
-            saveCollegesToCSV();
-        }
-    }
-
-    private void saveProgramsToCSV() {
-
-        ArrayList<String[]> data = new ArrayList<>();
-
-        for (int i = 0; i < programModel.getRowCount(); i++) {
-            data.add(new String[]{
-                    programModel.getValueAt(i, 0).toString(),
-                    programModel.getValueAt(i, 1).toString(),
-                    programModel.getValueAt(i, 2).toString()
+            masterColleges.set(row, new String[]{
+                    dialog.getCollegeName(),
+                    dialog.getCollegeCode()
             });
-        }
 
-        CsvUtils.writeAllPrograms(data);
+            CsvUtils.writeAllColleges(masterColleges);
+            refresh();
+        }
     }
 
     private void addProgram() {
 
-        ProgramDialog dialog = new ProgramDialog(this, null, null, null);
+        ProgramDialog dialog = new ProgramDialog(this, masterPrograms, masterColleges,null, null, null);
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
 
-            programModel.addRow(new Object[]{
+            masterPrograms.add(new String[]{
                     dialog.getProgramCode(),
                     dialog.getProgramName(),
-                    dialog.getCollege(),
-                    "Actions"
+                    dialog.getCollege()
             });
 
-            saveProgramsToCSV();
+            CsvUtils.writeAllPrograms(masterPrograms);
+            refresh();
         }
     }
 
@@ -510,20 +476,56 @@ public class Main extends JFrame {
 
         if (row < 0) return;
 
-        String code = programModel.getValueAt(row, 0).toString();
-        String name = programModel.getValueAt(row, 1).toString();
-        String college = programModel.getValueAt(row, 2).toString();
+        String[] data = masterPrograms.get(row);
 
-        ProgramDialog dialog = new ProgramDialog(this, code, name, college);
+        ProgramDialog dialog = new ProgramDialog(this, masterPrograms, masterColleges, data[0], data[1], data[2]);
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
 
-            programModel.setValueAt(dialog.getProgramCode(), row, 0);
-            programModel.setValueAt(dialog.getProgramName(), row, 1);
-            programModel.setValueAt(dialog.getCollege(), row, 2);
+            masterPrograms.set(row, new String[]{
+                    dialog.getProgramCode(),
+                    dialog.getProgramName(),
+                    dialog.getCollege()
+            });
 
-            saveProgramsToCSV();
+            CsvUtils.writeAllPrograms(masterPrograms);
+            refresh();
+        }
+    }
+
+    class SortHeaderRenderer implements TableCellRenderer {
+
+        private final TableCellRenderer defaultRenderer;
+
+        public SortHeaderRenderer(JTable table) {
+            this.defaultRenderer = table.getTableHeader().getDefaultRenderer();
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
+
+            Component c = defaultRenderer.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column);
+
+            if (c instanceof JLabel label) {
+
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+
+                String text = value.toString();
+
+                if (column == sortColumn &&
+                        !text.equals("Actions")) {
+
+                    text += sortAscending ? " ▲" : " ▼";
+                }
+
+                label.setText(text);
+            }
+
+            return c;
         }
     }
 
@@ -592,8 +594,6 @@ public class Main extends JFrame {
                 int viewRow = table.getSelectedRow();
                 if (viewRow < 0) return;
 
-                int row = table.convertRowIndexToModel(viewRow);
-
                 int confirm = JOptionPane.showConfirmDialog(
                         Main.this,
                         "Are you sure you want to delete this record?",
@@ -618,7 +618,8 @@ public class Main extends JFrame {
                         refresh();
                         fireEditingStopped();
                     }
-                    case "COLLEGE" ->                     {
+                    case "COLLEGE" -> {
+
                         String collegeCode = table.getValueAt(viewRow, 1).toString();
 
                         int cascadeConfirm = JOptionPane.showConfirmDialog(
@@ -639,23 +640,27 @@ public class Main extends JFrame {
                             return;
                         }
 
-                        // Remove college
-                        masterColleges.removeIf(c -> c[1].equals(collegeCode));
+                        java.util.List<String> programsToDelete = new ArrayList<>();
 
-                        // Remove programs under college
-                        masterPrograms.removeIf(p -> p[2].equals(collegeCode));
-
-                        // Update students
-                        for (String[] s : masterStudents) {
-                            if (s[3].equals(collegeCode)) {
-                                s[3] = "NULL";
-                                s[4] = "NULL";
+                        for (String[] p : masterPrograms) {
+                            if (p[2].equals(collegeCode)) {
+                                programsToDelete.add(p[0]); // program code
                             }
                         }
 
-                        CsvUtils.writeAllColleges(masterColleges);
-                        CsvUtils.writeAllPrograms(masterPrograms);
+                        for (String[] s : masterStudents) {
+                            if (programsToDelete.contains(s[3])) {
+                                s[3] = "NULL";
+                            }
+                        }
+
+                        masterPrograms.removeIf(p -> p[2].equals(collegeCode));
+
+                        masterColleges.removeIf(c -> c[1].equals(collegeCode));
+
                         CsvUtils.writeAll(masterStudents);
+                        CsvUtils.writeAllPrograms(masterPrograms);
+                        CsvUtils.writeAllColleges(masterColleges);
 
                         refresh();
                     }
@@ -680,8 +685,8 @@ public class Main extends JFrame {
 
                         // Update students
                         for (String[] s : masterStudents) {
-                            if (s[4].equals(programCode)) {
-                                s[4] = "NULL";
+                            if (s[3].equals(programCode)) {
+                                s[3] = "NULL";
                             }
                         }
 

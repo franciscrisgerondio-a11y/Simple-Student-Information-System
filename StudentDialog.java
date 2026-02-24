@@ -16,16 +16,26 @@ public class StudentDialog extends JDialog {
 
     private boolean saved = false;
 
+    private java.util.List<String[]> masterStudents;
+    private java.util.List<String[]> masterPrograms;
+    private java.util.List<String[]> masterColleges;
+
     public StudentDialog(JFrame parent,
+                     java.util.List<String[]> masterStudents,
+                     java.util.List<String[]> masterPrograms,
+                     java.util.List<String[]> masterColleges,
                      String id,
                      String first,
                      String last,
-                     String college,
                      String program,
                      String year,
                      String gender) {
 
         super(parent, true);
+
+        this.masterStudents = masterStudents;
+        this.masterPrograms = masterPrograms;
+        this.masterColleges = masterColleges;
 
         setTitle(id == null ? "Add Student" : "Edit Student");
         setSize(500, 500);
@@ -78,10 +88,17 @@ public class StudentDialog extends JDialog {
         formPanel.add(lblCollege);
 
         cmbCollege = new JComboBox<>();
-        loadCollegesFromCSV();
+        for (String[] r : this.masterColleges) {
+            cmbCollege.addItem(r[1]);
+        }
         formPanel.add(cmbCollege);
 
-        /* ================= PROGRAM (Dropdown) ================= */
+        cmbCollege.addActionListener(e -> {
+            String selectedCollege = cmbCollege.getSelectedItem().toString();
+            loadProgramsByCollege(selectedCollege);
+        });
+
+        /* ================= PROGRAM ================= */
         JLabel lblProgram = new JLabel("Program:");
         lblProgram.setFont(labelFont);
         formPanel.add(lblProgram);
@@ -89,13 +106,18 @@ public class StudentDialog extends JDialog {
         cmbProgram = new JComboBox<>();
         formPanel.add(cmbProgram);
 
-        /* ================= YEAR (1–6 Dropdown) ================= */
+        // Initial load
+        if (cmbCollege.getItemCount() > 0) {
+            loadProgramsByCollege(cmbCollege.getItemAt(0));
+        }
+
+        /* ================= YEAR (1–4 Dropdown) ================= */
         JLabel lblYear = new JLabel("Year:");
         lblYear.setFont(labelFont);
         formPanel.add(lblYear);
 
         cmbYear = new JComboBox<>();
-        for (int i = 1; i <= 6; i++) {
+        for (int i = 1; i <= 4; i++) {
             cmbYear.addItem(String.valueOf(i));
         }
         formPanel.add(cmbYear);
@@ -107,19 +129,6 @@ public class StudentDialog extends JDialog {
 
         cmbGender = new JComboBox<>(new String[]{"Male", "Female", "Other"});
         formPanel.add(cmbGender);
-
-        /* ===== AUTO LOAD FIRST COLLEGE PROGRAMS ===== */
-        if (cmbCollege.getItemCount() > 0) {
-            cmbCollege.setSelectedIndex(0);
-            loadProgramsByCollege(cmbCollege.getSelectedItem().toString());
-        }
-        cmbCollege.addActionListener(e -> {
-
-            if (cmbCollege.getSelectedItem() != null) {
-                String selectedCollege = cmbCollege.getSelectedItem().toString();
-                loadProgramsByCollege(selectedCollege);
-            }
-        });
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
@@ -144,13 +153,16 @@ public class StudentDialog extends JDialog {
             txtLastName.setText(last);
             cmbYear.setSelectedItem(year);
             cmbGender.setSelectedItem(gender);
-            cmbCollege.setSelectedItem(college);
 
-            // Load programs under selected college
-            loadProgramsByCollege(college);
-
-            // Then set selected program
+            for (String[] r : this.masterPrograms) {
+                if (r[0].equals(program)) {
+                    cmbCollege.setSelectedItem(r[2]);
+                    loadProgramsByCollege(r[2]);
+                    break;
+                }
+}
             cmbProgram.setSelectedItem(program);
+
         }
 
         save.addActionListener(e -> saveStudent());
@@ -158,27 +170,14 @@ public class StudentDialog extends JDialog {
     }
 
     /* ================= LOAD PROGRAMS ================= */
-    private void loadProgramsByCollege(String selectedCollege) {
+    private void loadProgramsByCollege(String collegeCode) {
 
         cmbProgram.removeAllItems();
 
-        for (String[] r : CsvUtils.readAllPrograms()) {
-
-            String programCode = r[0];
-            String collegeName = r[2];
-
-            if (collegeName.equals(selectedCollege)) {
-                cmbProgram.addItem(programCode);
+        for (String[] r : this.masterPrograms) {
+            if (r[2].equals(collegeCode)) {
+                cmbProgram.addItem(r[0]); // program code
             }
-        }
-    }
-
-    /* ================= LOAD COLLEGES ================= */
-    private void loadCollegesFromCSV() {
-        cmbCollege.removeAllItems();
-
-        for (String[] r : CsvUtils.readAllColleges()) {
-            cmbCollege.addItem(r[1]);
         }
     }
 
@@ -198,6 +197,7 @@ public class StudentDialog extends JDialog {
         String first = txtFirstName.getText().trim();
         String last = txtLastName.getText().trim();
 
+        /* ================= ID FORMAT VALIDATION ================= */
         if (!Pattern.matches("\\d{4}-\\d{4}", id)) {
             JOptionPane.showMessageDialog(this,
                     "Student ID must be in format xxxx-xxxx (numbers only).",
@@ -206,6 +206,7 @@ public class StudentDialog extends JDialog {
             return;
         }
 
+        /* ================= EMPTY FIELD VALIDATION ================= */
         if (first.isEmpty() || last.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "All fields must be filled.",
@@ -213,6 +214,22 @@ public class StudentDialog extends JDialog {
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        /* ================= DUPLICATE ID CHECK ================= */
+    if (txtStudentId.isEditable()) {
+
+        for (String[] row : this.masterStudents) {
+
+            if (row[0].equals(id)) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Student ID already exists.",
+                        "Duplicate ID",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+    }
 
         saved = true;
         dispose();
@@ -237,7 +254,8 @@ public class StudentDialog extends JDialog {
     }
 
     public String getProgram() {
-        return cmbProgram.getSelectedItem().toString();
+        Object selected = cmbProgram.getSelectedItem();
+        return selected == null ? "NULL" : selected.toString();
     }
 
     public String getYear() {
@@ -248,7 +266,4 @@ public class StudentDialog extends JDialog {
         return cmbGender.getSelectedItem().toString();
     }
 
-    public String getCollege() {
-        return cmbCollege.getSelectedItem().toString();
-    }
 }
