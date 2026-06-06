@@ -15,30 +15,32 @@ public class StudentDialog extends JDialog {
     private JComboBox<String> cmbCollege;
 
     private boolean saved = false;
+    private String originalId; // null when adding
 
     private java.util.List<String[]> masterStudents;
     private java.util.List<String[]> masterPrograms;
     private java.util.List<String[]> masterColleges;
 
     public StudentDialog(JFrame parent,
-                     java.util.List<String[]> masterStudents,
-                     java.util.List<String[]> masterPrograms,
-                     java.util.List<String[]> masterColleges,
-                     String id,
-                     String first,
-                     String last,
-                     String program,
-                     String year,
-                     String gender) {
+                         java.util.List<String[]> masterStudents,
+                         java.util.List<String[]> masterPrograms,
+                         java.util.List<String[]> masterColleges,
+                         String id,
+                         String first,
+                         String last,
+                         String program,
+                         String year,
+                         String gender) {
 
         super(parent, true);
 
         this.masterStudents = masterStudents;
         this.masterPrograms = masterPrograms;
         this.masterColleges = masterColleges;
+        this.originalId     = id; // null = add mode
 
         setTitle(id == null ? "Add Student" : "Edit Student");
-        setSize(500, 500);
+        setSize(500, 520);
         setLocationRelativeTo(parent);
         setResizable(false);
 
@@ -58,75 +60,52 @@ public class StudentDialog extends JDialog {
 
         Font labelFont = new Font("Segoe UI", Font.PLAIN, 14);
 
-        /* ================= STUDENT ID ================= */
-        JLabel lblId = new JLabel("Student ID:");
-        lblId.setFont(labelFont);
-        formPanel.add(lblId);
-
+        /* ===== Student ID ===== */
+        formPanel.add(styledLabel("Student ID:", labelFont));
         txtStudentId = new JTextField();
         formPanel.add(txtStudentId);
 
-        /* ================= FIRST NAME ================= */
-        JLabel lblFirst = new JLabel("First Name:");
-        lblFirst.setFont(labelFont);
-        formPanel.add(lblFirst);
-
+        /* ===== First Name ===== */
+        formPanel.add(styledLabel("First Name:", labelFont));
         txtFirstName = new JTextField();
         formPanel.add(txtFirstName);
 
-        /* ================= LAST NAME ================= */
-        JLabel lblLast = new JLabel("Last Name:");
-        lblLast.setFont(labelFont);
-        formPanel.add(lblLast);
-
+        /* ===== Last Name ===== */
+        formPanel.add(styledLabel("Last Name:", labelFont));
         txtLastName = new JTextField();
         formPanel.add(txtLastName);
 
-        /* ================= COLLEGE ================= */
-        JLabel lblCollege = new JLabel("College:");
-        lblCollege.setFont(labelFont);
-        formPanel.add(lblCollege);
-
+        /* ===== College ===== */
+        formPanel.add(styledLabel("College:", labelFont));
         cmbCollege = new JComboBox<>();
         for (String[] r : this.masterColleges) {
-            cmbCollege.addItem(r[1]);
+            cmbCollege.addItem(r[1]); // college code
         }
         formPanel.add(cmbCollege);
 
         cmbCollege.addActionListener(e -> {
-            String selectedCollege = cmbCollege.getSelectedItem().toString();
-            loadProgramsByCollege(selectedCollege);
+            if (cmbCollege.getSelectedItem() != null)
+                loadProgramsByCollege(cmbCollege.getSelectedItem().toString());
         });
 
-        /* ================= PROGRAM ================= */
-        JLabel lblProgram = new JLabel("Program:");
-        lblProgram.setFont(labelFont);
-        formPanel.add(lblProgram);
-
+        /* ===== Program ===== */
+        formPanel.add(styledLabel("Program:", labelFont));
         cmbProgram = new JComboBox<>();
         formPanel.add(cmbProgram);
 
-        // Initial load
+        // Initial program load
         if (cmbCollege.getItemCount() > 0) {
             loadProgramsByCollege(cmbCollege.getItemAt(0));
         }
 
-        /* ================= YEAR (1–4 Dropdown) ================= */
-        JLabel lblYear = new JLabel("Year:");
-        lblYear.setFont(labelFont);
-        formPanel.add(lblYear);
-
+        /* ===== Year ===== */
+        formPanel.add(styledLabel("Year:", labelFont));
         cmbYear = new JComboBox<>();
-        for (int i = 1; i <= 4; i++) {
-            cmbYear.addItem(String.valueOf(i));
-        }
+        for (int i = 1; i <= 4; i++) cmbYear.addItem(String.valueOf(i));
         formPanel.add(cmbYear);
 
-        /* ================= GENDER ================= */
-        JLabel lblGender = new JLabel("Gender:");
-        lblGender.setFont(labelFont);
-        formPanel.add(lblGender);
-
+        /* ===== Gender ===== */
+        formPanel.add(styledLabel("Gender:", labelFont));
         cmbGender = new JComboBox<>(new String[]{"Male", "Female", "Other"});
         formPanel.add(cmbGender);
 
@@ -135,45 +114,59 @@ public class StudentDialog extends JDialog {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(245, 247, 250));
 
-        JButton save = new JButton("Save");
+        JButton save   = new JButton("Save");
         JButton cancel = new JButton("Cancel");
 
-        styleButton(save, new Color(40, 167, 69));
+        styleButton(save,   new Color(40, 167, 69));
         styleButton(cancel, new Color(220, 53, 69));
 
         buttonPanel.add(save);
         buttonPanel.add(cancel);
 
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        if (id != null) {
+            // Edit mode — show cascade warning
+            JPanel south = new JPanel(new BorderLayout());
+            south.setBackground(new Color(245, 247, 250));
+            JLabel warn = new JLabel("<html><i>⚠ Changing the Student ID will replace the primary key.</i></html>");
+            warn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            warn.setForeground(new Color(180, 100, 0));
+            warn.setBorder(new EmptyBorder(4, 0, 4, 0));
+            south.add(warn, BorderLayout.NORTH);
+            south.add(buttonPanel, BorderLayout.SOUTH);
+            mainPanel.add(south, BorderLayout.SOUTH);
+        } else {
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        }
 
+        /* ===== Pre-fill in edit mode ===== */
         if (id != null) {
             txtStudentId.setText(id);
-            txtStudentId.setEditable(false);
             txtFirstName.setText(first);
             txtLastName.setText(last);
             cmbYear.setSelectedItem(year);
             cmbGender.setSelectedItem(gender);
 
-            for (String[] r : this.masterPrograms) {
-                if (r[0].equals(program)) {
-                    cmbCollege.setSelectedItem(r[2]);
-                    loadProgramsByCollege(r[2]);
-                    break;
+            // Find the college that owns this program, then select both
+            if (program != null && !program.equals("NULL")) {
+                for (String[] r : this.masterPrograms) {
+                    if (r[0].equals(program)) {
+                        cmbCollege.setSelectedItem(r[2]); // triggers loadProgramsByCollege via listener
+                        break;
+                    }
                 }
-}
+            }
+            // Select the program after college is set
             cmbProgram.setSelectedItem(program);
 
+            txtStudentId.requestFocusInWindow();
         }
 
         save.addActionListener(e -> saveStudent());
         cancel.addActionListener(e -> dispose());
     }
 
-    /* ================= LOAD PROGRAMS ================= */
     private void loadProgramsByCollege(String collegeCode) {
-
         cmbProgram.removeAllItems();
-
         for (String[] r : this.masterPrograms) {
             if (r[2].equals(collegeCode)) {
                 cmbProgram.addItem(r[0]); // program code
@@ -181,7 +174,48 @@ public class StudentDialog extends JDialog {
         }
     }
 
-    /* ================= STYLE BUTTON ================= */
+    private void saveStudent() {
+        String newId = txtStudentId.getText().trim();
+        String first = txtFirstName.getText().trim();
+        String last  = txtLastName.getText().trim();
+
+        if (!Pattern.matches("\\d{4}-\\d{4}", newId)) {
+            JOptionPane.showMessageDialog(this,
+                    "Student ID must be in format YYYY-NNNN (numbers only).",
+                    "Invalid ID", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (first.isEmpty() || last.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "All fields must be filled.",
+                    "Missing Information", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Duplicate check: skip if ID unchanged in edit mode
+        boolean idChanged = !newId.equals(originalId);
+        if (originalId == null || idChanged) {
+            for (String[] row : this.masterStudents) {
+                if (row[0].equals(newId)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Student ID '" + newId + "' already exists.",
+                            "Duplicate ID", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+        }
+
+        saved = true;
+        dispose();
+    }
+
+    private JLabel styledLabel(String text, Font font) {
+        JLabel l = new JLabel(text);
+        l.setFont(font);
+        return l;
+    }
+
     private void styleButton(JButton button, Color color) {
         button.setFocusPainted(false);
         button.setBackground(color);
@@ -190,80 +224,15 @@ public class StudentDialog extends JDialog {
         button.setPreferredSize(new Dimension(100, 35));
     }
 
-    /* ================= VALIDATION ================= */
-    private void saveStudent() {
-
-        String id = txtStudentId.getText().trim();
-        String first = txtFirstName.getText().trim();
-        String last = txtLastName.getText().trim();
-
-        /* ================= ID FORMAT VALIDATION ================= */
-        if (!Pattern.matches("\\d{4}-\\d{4}", id)) {
-            JOptionPane.showMessageDialog(this,
-                    "Student ID must be in format xxxx-xxxx (numbers only).",
-                    "Invalid ID",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        /* ================= EMPTY FIELD VALIDATION ================= */
-        if (first.isEmpty() || last.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "All fields must be filled.",
-                    "Missing Information",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        /* ================= DUPLICATE ID CHECK ================= */
-    if (txtStudentId.isEditable()) {
-
-        for (String[] row : this.masterStudents) {
-
-            if (row[0].equals(id)) {
-
-                JOptionPane.showMessageDialog(this,
-                        "Student ID already exists.",
-                        "Duplicate ID",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-    }
-
-        saved = true;
-        dispose();
-    }
-
-    /* ================= GETTERS ================= */
-
-    public boolean isSaved() {
-        return saved;
-    }
-
-    public String getStudentId() {
-        return txtStudentId.getText().trim();
-    }
-
-    public String getStudentName() {
-        return txtFirstName.getText().trim();
-    }
-
-    public String getLastName() {
-        return txtLastName.getText().trim();
-    }
-
+    public boolean isSaved()        { return saved; }
+    public String getStudentId()    { return txtStudentId.getText().trim(); }
+    public String getStudentName()  { return txtFirstName.getText().trim(); }
+    public String getLastName()     { return txtLastName.getText().trim(); }
+    public String getOriginalId()   { return originalId; }
     public String getProgram() {
-        Object selected = cmbProgram.getSelectedItem();
-        return selected == null ? "NULL" : selected.toString();
+        Object sel = cmbProgram.getSelectedItem();
+        return sel == null ? "NULL" : sel.toString();
     }
-
-    public String getYear() {
-        return cmbYear.getSelectedItem().toString();
-    }
-
-    public String getGender() {
-        return cmbGender.getSelectedItem().toString();
-    }
-
+    public String getYear()   { return cmbYear.getSelectedItem().toString(); }
+    public String getGender() { return cmbGender.getSelectedItem().toString(); }
 }

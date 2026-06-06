@@ -1,11 +1,20 @@
-BSIT,Bachelor of Science in Information Technology,CCS
-BSIS,Bachelor of Science in Information Systems,CCS
-BSA,Bachelor of Science in Accountancy,CEBA
-BSBA,Bachelor of Science in Business Administration,CEBA
-BSFM,Bachelor of Science in Financial Management,CEBA
+BSIT,Bachelor of Science in Information Technology,CIT
+BSCS,Bachelor of Science in Computer Science,CIT
+BSIS,Bachelor of Science in Information Systems,CIT
+BSCE,Bachelor of Science in Civil Engineering,COE
+BSEE,Bachelor of Science in Electrical Engineering,COE
+BSME,Bachelor of Science in Mechanical Engineering,COE
+BSA,Bachelor of Science in Accountancy,CBA
+BSBA,Bachelor of Science in Business Administration,CBA
+BSMA,Bachelor of Science in Management Accounting,CBA
+BSPSY,Bachelor of Science in Psychology,CAS
+BSBIO,Bachelor of Science in Biology,CAS
+BSMATH,Bachelor of Science in Mathematics,CAS
 BSED,Bachelor of Secondary Education,CED
 BEED,Bachelor of Elementary Education,CED
-BSPSY,Bachelor of Science in Psychology,CASS
-BSBIO,Bachelor of Science in Biology,CSM
-BSCHEM,Bachelor of Science in Chemistry,CSM
-BSCS,Bachelor of Science in Computer Science,CCS
+BSN,Bachelor of Science in Nursing,CHS
+BSPH,Bachelor of Science in Public Health,CHS
+BSPHAR,Bachelor of Science in Pharmacy,CHS
+BSCRIM,Bachelor of Science in Criminology,CCJ
+BSCYBER,Bachelor of Science in Cybersecurity,CCJ
+BSFS,Bachelor of Science in Forensic Science,CCJ

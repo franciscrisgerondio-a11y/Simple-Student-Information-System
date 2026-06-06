@@ -186,6 +186,7 @@ public class Main extends JFrame {
         table.setSelectionBackground(new Color(247, 215, 144)); 
         table.setSelectionForeground(Color.BLACK);
         table.setRowHeight(36);
+        table.setFillsViewportHeight(true);
         table.setDefaultRenderer(Object.class, new HighlightRenderer());
         
 
@@ -215,7 +216,19 @@ public class Main extends JFrame {
         table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
         table.getColumn("Actions").setCellEditor(new ButtonEditor());
 
-        return new JScrollPane(table);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.getViewport().setBackground(new Color(219, 234, 254));
+
+        scrollPane.getViewport().addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                int viewportHeight = scrollPane.getViewport().getHeight();
+                if (viewportHeight <= 0) return;
+                table.setRowHeight(Math.max(36, viewportHeight / rowsPerPage));
+            }
+        });
+
+        return scrollPane;
     }
 
     /* ================= PAGINATION ================= */
@@ -653,8 +666,8 @@ public class Main extends JFrame {
                         int cascadeConfirm = JOptionPane.showConfirmDialog(
                                 Main.this,
                                 """
-                                Deleting this college will also delete its programs
-                                and set affected students to NULL.
+                                Deleting this college will set its programs' college to NULL.
+                                Affected students will not be changed.
 
                                 Continue?
                                 """,
@@ -668,21 +681,12 @@ public class Main extends JFrame {
                             return;
                         }
 
-                        java.util.List<String> programsToDelete = new ArrayList<>();
-
+                        // Nullify college reference on affected programs (keep programs, don't delete them)
                         for (String[] p : masterPrograms) {
                             if (p[2].equals(collegeCode)) {
-                                programsToDelete.add(p[0]); // program code
+                                p[2] = "NULL";
                             }
                         }
-
-                        for (String[] s : masterStudents) {
-                            if (programsToDelete.contains(s[3])) {
-                                s[3] = "NULL";
-                            }
-                        }
-
-                        masterPrograms.removeIf(p -> p[2].equals(collegeCode));
 
                         masterColleges.removeIf(c -> c[1].equals(collegeCode));
 
