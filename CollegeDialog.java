@@ -110,6 +110,7 @@ public class CollegeDialog extends JDialog {
             boolean codeChanged = !codeValue.equals(originalCode);
             if (originalCode == null || codeChanged) {
                 for (String[] row : this.masterColleges) {
+                    if (row.length < 2) continue;
                     if (row[1].equalsIgnoreCase(codeValue)) {
                         JOptionPane.showMessageDialog(this,
                                 "College code '" + codeValue + "' already exists.",

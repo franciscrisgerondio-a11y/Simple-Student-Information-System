@@ -359,9 +359,9 @@ public class Main extends JFrame {
             String[] row = filtered.get(i);
 
             switch (currentView) {
-                case "STUDENT" -> activeModel.addRow(new Object[]{row[0],row[1],row[2],row[3],row[4],row[5],"Actions"});
-                case "COLLEGE" -> activeModel.addRow(new Object[]{row[0],row[1],"Actions"});
-                default -> activeModel.addRow(new Object[]{row[0],row[1],row[2],"Actions"});
+                case "STUDENT" -> { if (row.length >= 6) activeModel.addRow(new Object[]{row[0],row[1],row[2],row[3],row[4],row[5],"Actions"}); }
+                case "COLLEGE" -> { if (row.length >= 2) activeModel.addRow(new Object[]{row[0],row[1],"Actions"}); }
+                default -> { if (row.length >= 3) activeModel.addRow(new Object[]{row[0],row[1],row[2],"Actions"}); }
             }
         }
 
@@ -477,10 +477,9 @@ public class Main extends JFrame {
             data[0] = dialog.getCollegeName();
             data[1] = newCode;
 
-            // Cascade college code change to linked programs
             if (!newCode.equals(oldCode)) {
                 for (String[] program : masterPrograms) {
-                    if (program[2].equals(oldCode)) {
+                    if (program.length >= 3 && program[2].equals(oldCode)) {
                         program[2] = newCode;
                     }
                 }
@@ -538,10 +537,9 @@ public class Main extends JFrame {
             data[1] = dialog.getProgramName();
             data[2] = dialog.getCollege();
 
-            // Cascade program code change to enrolled students
             if (!newCode.equals(oldCode)) {
                 for (String[] student : masterStudents) {
-                    if (student[3].equals(oldCode)) {
+                    if (student.length >= 4 && student[3].equals(oldCode)) {
                         student[3] = newCode;
                     }
                 }

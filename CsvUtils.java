@@ -30,6 +30,7 @@ public class CsvUtils {
                     continue;
                 }
 
+                if (line.isBlank()) continue;
                 rows.add(line.split(",", -1));
                 firstLine = false;
             }
