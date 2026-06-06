@@ -420,7 +420,10 @@ public class Main extends JFrame {
 
         if (dialog.isSaved()) {
 
-            // Update the actual object found
+            String oldId = dialog.getOriginalId();
+            String newId = dialog.getStudentId();
+
+            data[0] = newId;
             data[1] = dialog.getStudentName();
             data[2] = dialog.getLastName();
             data[3] = dialog.getProgram();
@@ -468,8 +471,21 @@ public class Main extends JFrame {
 
         if (dialog.isSaved()) {
 
+            String oldCode = dialog.getOriginalCode();
+            String newCode = dialog.getCollegeCode();
+
             data[0] = dialog.getCollegeName();
-            data[1] = dialog.getCollegeCode();
+            data[1] = newCode;
+
+            // Cascade college code change to linked programs
+            if (!newCode.equals(oldCode)) {
+                for (String[] program : masterPrograms) {
+                    if (program[2].equals(oldCode)) {
+                        program[2] = newCode;
+                    }
+                }
+                CsvUtils.writeAllPrograms(masterPrograms);
+            }
 
             CsvUtils.writeAllColleges(masterColleges);
             refresh();
@@ -515,8 +531,22 @@ public class Main extends JFrame {
 
         if (dialog.isSaved()) {
 
+            String oldCode = dialog.getOriginalCode();
+            String newCode = dialog.getProgramCode();
+
+            data[0] = newCode;
             data[1] = dialog.getProgramName();
             data[2] = dialog.getCollege();
+
+            // Cascade program code change to enrolled students
+            if (!newCode.equals(oldCode)) {
+                for (String[] student : masterStudents) {
+                    if (student[3].equals(oldCode)) {
+                        student[3] = newCode;
+                    }
+                }
+                CsvUtils.writeAll(masterStudents);
+            }
 
             CsvUtils.writeAllPrograms(masterPrograms);
             refresh();
